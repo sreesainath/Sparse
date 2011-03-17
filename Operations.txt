@@ -1,0 +1,116 @@
+Operations on Sparse matrices
+
+
+1.Argmax
+Maximum value along a specified axis
+2.Argmin
+Minimum value along a specified axis
+3.Argsort
+Sort along a specified axis
+4.Argdiagonal
+Diagonal along a specified axis
+5.Argprod
+Product along a specified axis
+6.Argsum
+Sum along a specified axis
+7.Argpeaks
+Maxima and minima along a specified axis
+8.Compress
+Return selected slices along a specified axis
+9.Cumprod
+Product of all elements
+10.Cumsum
+Sum of all elements
+11.Max
+Max value in the matrix
+12.Min
+Min value in the matrix
+13.Mean
+Mean of all elements
+14.Variance
+Variance of all elements
+15.Std. Deviation
+Std Deviation of all elements
+16.Sort
+Sort the matrix
+17.Squareroot
+18.Square
+19.Element_replace
+Replace all ‘x’ elements with the given value
+20.Element_Add
+Add a new element to the matrix
+21.Reshape
+Convert the array to a new shape with same elements
+22.Resize
+Convert the array to a new size and shape with same elements
+23.Swap_axes
+Swap elements on specified axes
+24.Transpose
+Transpose of the matrix (possible for higher dimensions?)
+25.Flatten
+Return 1D array for the matrix
+
+26.Take
+Form an array from the matrix with the given indices
+27.Repeat
+Repeat elements of an array
+28.Add_sorted
+Sort a matrix and add a new element
+29.Clip
+Return a matrix that has only values within a specified range
+30.Round
+Round the values of the matrix to a given no of decimals
+31.ArgTrace
+Sum of diagonals along a specified axis
+32.Negative
+returns -Matrix
+33.Positive
+returns +Matrix
+34.Absolute
+Returs |Matrix|
+35.Inverse
+Inverse of the matrix(If invertible)
+36.Matrix addition
+37.Matrix multiplication
+38.Dot product
+39.Outer Product
+40.Tensor Dot product
+
+
+The sparser matrix is assumed to be real at this point.
+
+ELEMENT-WISE OPERATIONS
+
+1. Cumulative Product
+	Product of all elements inside a matrix
+2. Cumulative Sum
+	Sum of all elements inside a matrix
+3. Squareroot
+4. Maximum value
+5. Minimum value
+6. Mean value
+7. Maximum value along an axis
+8. Minimum value along an axis
+9. Mean value along an axis
+10. Transpose
+11. Swap axes
+12. Matrix addition
+13. Matrix Subtraction
+14. Matrix Square 
+15. Appending elements to an existing Sparse Matrix
+16. Reshape
+17. Resize
+18. Inner Product
+19. Outer Product
+20. Tensordot Prodct
+21. Dot Product (Not same as inner product?)
+22. Reshaping
+23. Slicing over a single axis and over multiple axes
+
+
+
+1. argmax
+2. argmin
+
+
+
