@@ -6,7 +6,7 @@ class Sparse_matrix
 {
 
 private:
-//The data types are specified int initially for simplicity. These will be converted to Template format soon. Values in the sparse matrix are considered to be real.
+//The data types are specified int initially for simplicity. These will be converted to Template format soon. Values in the sparse matrix are considered to be real. Assuming for now that the matricces are index sorted.
 
 	int num_dims;               // No. of dimensions or Dimensionality
 	int *shape;                 // Shape of the matrix. For e.g. 3 X 2 X 2
@@ -19,8 +19,11 @@ public:
 // Member functions
 	void printdata();
 	// Arithmetic Operations
-	double cumprod();
-	double cumsum();
+	double cumprod();	     // To be changed as a single function that may take axis as arguement
+	double cumsum();	     // To be changed as a single function that may take axis as arguement
+	double max();
+	double min();
+	double mean();
 	Sparse_matrix square();
 	Sparse_matrix sq_root();
 //	void square();
@@ -50,7 +53,7 @@ Sparse_matrix(int dim, int num_val, double *val, int *shape, int ** indices)
 
 ~Sparse_matrix()
 {
-//Destructor
+//Destructor - tbc
 	delete[] nz_vals;
 }
 
@@ -101,6 +104,39 @@ double Sparse_matrix :: cumsum()
 	return sum;
 }
 
+double Sparse_matrix :: max()		// Maximum value in the matrix , will be extended to cover axes in the next revision
+{
+	double max = nz_vals[0];
+	for(int i = 1; i < num_nzvals; i++)
+	{
+		if(nz_vals[i] > max)
+			max = nz_vals[i];
+	}
+	return max;
+}
+
+double Sparse_matrix :: min()		// Miniimum value in the matrix , will be extended to cover axes in the next revision
+{
+	double min = nz_vals[0];
+	for(int i = 1; i < num_nzvals; i++)
+	{
+		if(nz_vals[i] < min)
+			min = nz_vals[i];
+	}
+	return min;
+}
+
+double Sparse_matrix :: mean()		// Mean value in the matrix , will be extended to cover axes in the next revision
+{
+	double mean = 0.0;
+	for(int i = 0; i < num_nzvals; i++)
+	{
+		mean += nz_vals[i];
+	}
+	mean = mean / num_nzvals;
+	return mean;
+}
+
 /*void Sparse_matrix :: square()		// Same matrix is used to store the squared value
 {
 	for(int i = 0; i < num_nzvals; i++)
@@ -108,7 +144,7 @@ double Sparse_matrix :: cumsum()
 }*/
 
 
-/*Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition
+Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - index-wise
 {
 	// Step 1: Compatibility Check
 	if(num_dims != b.num_dims) 
@@ -126,6 +162,20 @@ double Sparse_matrix :: cumsum()
 				return;
 			}
 		}
+		Sparse_matrix a;
+		int nz = 0;
+		if(num_nzvals > b.num_nzvals)
+		{
+			for(int i = 0; i < num_nzvals ; i++)
+				for(int k = 0; k < num_dims; k++)
+				{
+					if(indices[i][k] == b.indices[i][k])
+						continue;
+					else
+						nz++;
+				}
+		}
+		a.num_nzvals = num_nzvals + nz;
 	}
-}*/
+}
 
