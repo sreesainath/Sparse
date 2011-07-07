@@ -40,9 +40,11 @@ public:
 	Sparse_matrix sq_root();
 	void square();
 //	Sparse_matrix addition(Sparse_matrix);
-	double* dot(Sparse_matrix);
+	double* dotprod(Sparse_matrix);
 
-Sparse_matrix(int dim, int num_val, double *val, int *shape, int **index)
+	void getshape();
+	void addval(double value,int *index);
+Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
 {
 // Initializations in case values are known. Otherwise default constructor is invoked.
 	num_dims = dim;
@@ -52,7 +54,7 @@ Sparse_matrix(int dim, int num_val, double *val, int *shape, int **index)
 		nz_vals[i] = val[i];
 	shape = new int[num_dims];
 	for(int i = 0; i < num_dims; i++)
-		shape[i] = shape[i]; 
+		shape[i] = shapes[i]; 
 	ptr = new int* [num_nzvals];
 	for(int i =0; i < num_nzvals; i++)
 		ptr[i] = new int[num_dims];
@@ -105,10 +107,28 @@ Sparse_matrix(int dim, int num_val, double *val, int *shape, int **index)
 
 };
 
+void Sparse_matrix :: getshape()
+{
+	for(int i = 0; i < num_dims; i++)
+		cout<<"\t"<< shape[i];
+}
 
+/*void Sparse_matrix :: addval(double value, int *index)
+{
+	++num_nzvals;	
+	//nz_vals[num_nzvals] = new double[1];
+	nz_vals[num_nzvals] = value;
+	indices[num_nzvals] = new int[num_dims];
+	for(int j = 0; j < num_dims ; j++)
+		indices[num_nzvals][j] = index[j];
+	
+}*/
 void Sparse_matrix :: printdata()		// Printing values to moniter
 {
 	cout<< "\nDimensionality: " << num_dims;
+	cout<<"\nShape of the matrix:";
+	for(int i =0; i < num_dims; i++)
+		cout<<"\t"<<shape[i];
 	cout<< "\nNo. of non-zero Values: " << num_nzvals;
 	cout<< "\nValues: ";
 	for(int i = 0; i < num_nzvals; i++)
@@ -482,7 +502,7 @@ Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - ind
 	}
 }
 */
-double* Sparse_matrix :: dot(Sparse_matrix a) // INCOMPLETE
+double* Sparse_matrix :: dotprod(Sparse_matrix a) // INCOMPLETE
 {
 	int endval;
 	if(num_nzvals > a.num_nzvals)
@@ -491,7 +511,9 @@ double* Sparse_matrix :: dot(Sparse_matrix a) // INCOMPLETE
 		endval = a.num_nzvals;
 
 	double *dots;
-	dots = new double[endval]();
+	dots = new double[endval];
+	for(int i = 0; i < endval; i++)
+		dots[i] = 0;
 
 	if(num_dims != a.num_dims)
 	{
@@ -513,7 +535,8 @@ double* Sparse_matrix :: dot(Sparse_matrix a) // INCOMPLETE
 			{
 				if((indices[i][j] == a.indices[i][j]) && (indices[i][j+1] == a.indices[i][j+1]))
 				{
-					dots[i] = dots[i] + nz_vals[i] * a.nz_vals[i];
+					dots[i] += nz_vals[i] * a.nz_vals[i];
+					break;
 				}					
 			}
 				
