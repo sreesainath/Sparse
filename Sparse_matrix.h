@@ -1,12 +1,13 @@
 #include<iostream>
 #include<math.h>
+
 using namespace std;
 
 class Sparse_matrix
 {
 
 private:
-//The data types are specified int initially for simplicity. These will be converted to Template format soon. Values in the sparse matrix are considered to be real. Assuming for now that the matricces are index sorted.
+//The data types are specified int initially for simplicity. These will be converted to Template format soon. Values in the sparse matrix are considered to be real. Assuming for now that the matrices are index sorted.
 
 	int num_dims;               // No. of dimensions or Dimensionality
 	int *shape;                 // Shape of the matrix. For e.g. 3 X 2 X 2
@@ -18,11 +19,13 @@ private:
 public:
 // Member functions
 	void printdata();
+	void sortindices(int axis);
+	void sortindices();
 	// Arithmetic Operations
 	double* cumprod();	     // To be changed as a single function that may take axis as arguement
 	double* cumsum();	     // To be changed as a single function that may take axis as arguement
 	double max();
-	int* argmax();
+	int** argmax(int axis = -1);
 	double min();
 	int* argmin();
 	double mean();
@@ -40,8 +43,7 @@ public:
 	Sparse_matrix sq_root();
 	void square();
 //	Sparse_matrix addition(Sparse_matrix);
-	double* dotprod(Sparse_matrix);
-
+//	double* dotprod(Sparse_matrix);
 	void getshape();
 	void addval(double value,int *index);
 Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
@@ -64,6 +66,7 @@ Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
 	for(int i =0; i < num_nzvals; i++)
 		for(int j = 0; j < num_dims; j++)
 		indices[i][j] = index[i][j];
+	sortindices();
 	for(int i = 0; i < num_nzvals; i++)
 		ptr[i][0] = indices[i][1];
 	for(int j =1; j < num_dims ; j++)
@@ -150,6 +153,99 @@ void Sparse_matrix :: printdata()		// Printing values to moniter
 
 }
 
+void Sparse_matrix :: sortindices(int axis)
+{
+	int k = axis, tempval=0;
+	int *temp;
+	temp = new int[num_dims];
+	for(int i = 0; i < num_nzvals; i++)
+                        for(int j = i+1 ; j < num_nzvals; j++)
+                        {
+                                if((indices[i][k+1] == indices[j][k+1]) && (indices[i][k] > indices[j][k]))
+                                {
+	                                temp = indices[i];
+                                        indices[i] = indices[j];
+                                        indices[j] = temp;
+
+                                        tempval = nz_vals[i];
+                                        nz_vals[i] = nz_vals[j];
+                                        nz_vals[j] = tempval;
+                                }
+                         
+			}
+}
+
+void Sparse_matrix :: sortindices()
+{
+	int k = num_dims - 1, tempval = 0;
+	int *temp;
+	temp = new int[num_dims];
+	while(k >= 1)
+	{
+		for(int i = 0; i < num_nzvals; i++)
+		for(int j = i+1 ; j < num_nzvals; j++)
+		{
+			if(k == num_dims - 1)
+			{
+				if(indices[i][k] > indices[j][k])
+				{	
+					temp = indices[i];
+					indices[i] = indices[j];
+					indices[j] = temp;
+					
+					tempval = nz_vals[i];
+					nz_vals[i] = nz_vals[j];
+					nz_vals[j] = tempval;
+				}
+			}
+			else
+			{
+				if(k == 1)
+				{
+					if(indices[i][k+1] == indices[j][k+1])
+					{	if(indices[i][k-1] > indices[j][k-1])
+						{
+							temp = indices[i];
+							indices[i] = indices[j];
+							indices[j] = temp;
+
+							tempval = nz_vals[i];
+       	        	                                nz_vals[i] = nz_vals[j];
+        	                                        nz_vals[j] = tempval;
+						}
+						if(indices[i][k-1] == indices[j][k-1])
+						{
+							if(indices[i][k] > indices[j][k])
+							{
+								temp = indices[i];
+								indices[i] = indices[j];
+								indices[j] = temp;
+								
+								tempval = nz_vals[i];
+		                                                nz_vals[i] = nz_vals[j];
+                       			                        nz_vals[j] = tempval;
+							}
+						}
+					}
+				}
+				else
+				{
+					if((indices[i][k+1] == indices[j][k+1]) && (indices[i][k] > indices[j][k]))
+					{	
+						temp = indices[i];
+						indices[i] = indices[j];
+						indices[j] = temp;
+				
+						tempval = nz_vals[i];
+                                       	        nz_vals[i] = nz_vals[j];
+                                               	nz_vals[j] = tempval;
+					}
+				}
+			}
+		}
+		k--;	
+	}
+}
 /*
 Sparse_matrix Sparse_matrix :: square()		// Square of the matrix
 {
@@ -248,7 +344,7 @@ void Sparse_matrix :: __abs__()                  // Absolute value of each eleme
 		nz_vals[i] = fabs(nz_vals[i]);
 }
 	
-double*  Sparse_matrix :: cumprod()			// Product of all non-zero elements - Cumulative Product
+double*  Sparse_matrix :: cumprod()	// Product of all non-zero elements - Cumulative Product without axis 
 {
 	double * prod;
 	prod = new double[num_nzvals];
@@ -339,20 +435,65 @@ double Sparse_matrix :: max()		// Maximum value in the matrix , will be extended
 	return max;
 }
 
-int* Sparse_matrix :: argmax()          // Returns the indices of the maximum value
+int** Sparse_matrix :: argmax(int axis = -1)          // Returns the indices of the maximum value
 {
-	int *argsmax;
-	argsmax = new int[num_dims];
-	argsmax = indices[0];
-	double max = nz_vals[0];
-        for(int i = 1; i < num_nzvals; i++)
-        {
-                if(nz_vals[i] > max)
+	int **argsmax;
+	sortincides(axis);
+	int toalloc = 1;
+	if(axis != -1)
+	{
+		for(int i = 0; i < num_nzvals; i++)
 		{
-                        max = nz_vals[i];
-			argsmax = indices[i];
+			if(indices[i][axis] != indices[i+1][axis])
+				toalloc += 1;
+			else
+				continue;
 		}
-        }
+		argsmax = new int*[toalloc];
+		for(int i = 0; i < toalloc; i++)
+			argsmax[i] = new int[num_dims];
+		int k = 0,i = 0;
+		double max;
+		for(int i = 0; i < num_nzvals; i++)
+		{
+			max = nz_vals[i];
+			if(axis == 0)
+			else
+			{	
+				if(indices[i][axis+1] != indices[i+1][axis+1])
+				{
+					argsmax[k] = indices[i+1];
+					k++;
+				}
+				else
+				{
+					if(indices[i][axis] != indices[i+1][axis])
+					{
+						argsmax[k] = indices[i];
+						k++;
+					}
+					else
+					{
+						if(nz_vals[i] > max)
+							argsmax[k] = indices[i];
+							k++;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		double max = nz_vals[0];
+        	for(int i = 1; i < num_nzvals; i++)
+        	{
+                	if(nz_vals[i] > max)
+			{
+                        	max = nz_vals[i];
+				*argsmax = indices[i];
+			}
+        	}
+	}
         return argsmax;
 }
 
@@ -485,10 +626,7 @@ Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - ind
 		}
 		Sparse_matrix a;
 		int nz = 0;
-		if(num_nzvals > b.num_nzvals)
-			a.num_nzvals = num_nzvals;
-		else
-			a.um_nzvals = b.num_nzvals;
+		a.num_nzvals = num_nzvals;
 		for(int i = 0; i < num_nzvals ; i++)
 				for(int k = 0; k < num_dims; k++)
 				{
@@ -502,7 +640,7 @@ Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - ind
 	}
 }
 */
-double* Sparse_matrix :: dotprod(Sparse_matrix a) // INCOMPLETE
+/*double* Sparse_matrix :: dotprod(Sparse_matrix a) // INCOMPLETE
 {
 	int endval;
 	if(num_nzvals > a.num_nzvals)
@@ -542,4 +680,4 @@ double* Sparse_matrix :: dotprod(Sparse_matrix a) // INCOMPLETE
 				
 	}
 	return dots;
-}
+}*/
