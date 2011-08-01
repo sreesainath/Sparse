@@ -7,7 +7,8 @@ class Sparse_matrix
 {
 
 private:
-//The data types are specified int initially for simplicity. These will be converted to Template format soon. Values in the sparse matrix are considered to be real. Assuming for now that the matrices are index sorted.
+//The data types are specified int initially for simplicity. These will be converted to Template format soon. 
+//Values in the sparse matrix are considered to be real.
 
 	int num_dims;               // No. of dimensions or Dimensionality
 	int *shape;                 // Shape of the matrix. For e.g. 3 X 2 X 2
@@ -19,33 +20,36 @@ private:
 public:
 // Member functions
 	void printdata();
-	void sortindices(int axis);
-	void sortindices();
+//	void sortindices();                         // Sorting indices based on a particular axis
+	void sortindices(int axis);                 // Sorting indices - row first format
+
 	// Arithmetic Operations
 	double* cumprod();	     // To be changed as a single function that may take axis as arguement
 	double* cumsum();	     // To be changed as a single function that may take axis as arguement
-	double max();
-	int** argmax(int axis = -1);
-	double min();
-	int* argmin();
-	double mean();
-	void sort();
+	double max();				    // Maximum value of the matrix
+	int** argmax(int axis);                // Index of the maximum value, in the whole matrix or an axis
+	double min();				    // Minimum value in the matrix
+	int* argmin();                              // Index of the minimum value
+	double mean();                              // Mean value of the matrix
+	void sort();                                // Sorted matrix, in-place sorting
 //	int** argsort();
-	void __neg__();
-	void __pos__(); 
-	void __abs__();
-	void clip(double min, double max);
-	void swapaxes(int axis1, int axis2);
-	void flatten();
-	double getitem(int *index);
-	void setitem(int *index, double value);
-//	Sparse_matrix square();
-	Sparse_matrix sq_root();
-	void square();
-//	Sparse_matrix addition(Sparse_matrix);
-//	double* dotprod(Sparse_matrix);
-	void getshape();
-	void addval(double value,int *index);
+	void __neg__();                             // -matrix
+	void __pos__();                             // +matrix
+	void __abs__();                             // |matrix|
+//      Sparse_matrix square();
+        Sparse_matrix sq_root();                    // Square root of each element
+        void square();                              // matrix^2
+        Sparse_matrix addition(Sparse_matrix);      // Matrix Addition
+        double* dotprod(Sparse_matrix &);           // Dot product
+	Sparse_matrix slice(int *);
+	//Operation on values
+	void clip(double min, double max);          // Restrict the values of the matrix between the min and max values
+	void swapaxes(int axis1, int axis2);        // Swap the values in two axes
+	void flatten();                             // Convert the matrix into an array
+	double getitem(int *index);                 // Get the value corresponding to the index
+	void setitem(int *index, double value);     // Set the value of an item corresponding to the index
+	void getshape();                            // Get the shape of the matrix
+	void addval(double value,int *index);       // add value at the particular index(same as setitem)
 Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
 {
 // Initializations in case values are known. Otherwise default constructor is invoked.
@@ -66,7 +70,7 @@ Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
 	for(int i =0; i < num_nzvals; i++)
 		for(int j = 0; j < num_dims; j++)
 		indices[i][j] = index[i][j];
-	sortindices();
+	sortindices(-1);
 	for(int i = 0; i < num_nzvals; i++)
 		ptr[i][0] = indices[i][1];
 	for(int j =1; j < num_dims ; j++)
@@ -87,6 +91,10 @@ Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
 	while(j < num_dims)
 	{
 		l = 1;
+	j = 2;
+	while(j < num_dims)
+	{
+		l = 1;
 		for(int i = 1; i < num_nzvals; i++)
                 {
                         diff = indices[i][j] - indices[i-1][j];
@@ -100,6 +108,7 @@ Sparse_matrix(int dim, int num_val, double *val, int *shapes, int **index)
                 }
 		j++;
         }
+	}
 } 
 
 ~Sparse_matrix()
@@ -153,7 +162,7 @@ void Sparse_matrix :: printdata()		// Printing values to moniter
 
 }
 
-void Sparse_matrix :: sortindices(int axis)
+/*void Sparse_matrix :: sortindices(int axis)
 {
 	int k = axis, tempval=0;
 	int *temp;
@@ -174,9 +183,11 @@ void Sparse_matrix :: sortindices(int axis)
                          
 			}
 }
-
-void Sparse_matrix :: sortindices()
+*/
+void Sparse_matrix :: sortindices(int axis = -1)
 {
+	if(axis == -1)
+	{
 	int k = num_dims - 1, tempval = 0;
 	int *temp;
 	temp = new int[num_dims];
@@ -244,6 +255,28 @@ void Sparse_matrix :: sortindices()
 			}
 		}
 		k--;	
+	}
+	}
+	else
+	{
+	int k = axis, tempval=0;
+        int *temp;
+        temp = new int[num_dims];
+        for(int i = 0; i < num_nzvals; i++)
+                        for(int j = i+1 ; j < num_nzvals; j++)
+                        {
+                                if((indices[i][k+1] == indices[j][k+1]) && (indices[i][k] > indices[j][k]))
+                                {
+                                        temp = indices[i];
+                                        indices[i] = indices[j];
+                                        indices[j] = temp;
+
+                                        tempval = nz_vals[i];
+                                        nz_vals[i] = nz_vals[j];
+                                        nz_vals[j] = tempval;
+                                }
+
+                        }
 	}
 }
 /*
@@ -434,7 +467,28 @@ double Sparse_matrix :: max()		// Maximum value in the matrix , will be extended
 	}
 	return max;
 }
-
+/*
+double* Sparse_matrix :: max(int axis)
+{
+	double *max;
+	int vals = 1;
+	for(int i =0; i < numdims; i++)
+	{
+		if(i != axis)
+			vals = vals * shape[i];
+	}
+	max = new double[vals];
+	int k = 0;
+	max[0] = nz_vals[0];
+	for(int i = 0; i < num_nzvals; i++)
+	{
+		
+		
+	}
+	return max;
+}
+*/
+/*
 int** Sparse_matrix :: argmax(int axis = -1)          // Returns the indices of the maximum value
 {
 	int **argsmax;
@@ -458,6 +512,8 @@ int** Sparse_matrix :: argmax(int axis = -1)          // Returns the indices of 
 		{
 			max = nz_vals[i];
 			if(axis == 0)
+			{
+			}
 			else
 			{	
 				if(indices[i][axis+1] != indices[i+1][axis+1])
@@ -481,6 +537,7 @@ int** Sparse_matrix :: argmax(int axis = -1)          // Returns the indices of 
 				}
 			}
 		}
+		return argsmax;
 	}
 	else
 	{
@@ -496,7 +553,7 @@ int** Sparse_matrix :: argmax(int axis = -1)          // Returns the indices of 
 	}
         return argsmax;
 }
-
+*/
 double Sparse_matrix :: min()		// Miniimum value in the matrix , will be extended to cover axes in the next revision
 {
 	double min = nz_vals[0];
@@ -605,14 +662,15 @@ void Sparse_matrix :: setitem(int *index, double value)
 //	nzvals[i] = value;
 //	indices[i] = index;
 }
-/*
+
 Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - index-wise
 {
+	int flag = 0;
 	// Step 1: Compatibility Check
 	if(num_dims != b.num_dims) 
 	{
 		cout<<"\n Matrices Incompatible for addition";
-		return;
+		return b;
 	}
 	else
 	{ // This block will be removed once != operator is overloaded
@@ -621,41 +679,50 @@ Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - ind
 			if(shape[i] != b.shape[i])
 			{
 				cout<<"\nMatrices Incompatible for addition";
-				return;
+				return b;
 			}
 		}
-		Sparse_matrix a;
-		int nz = 0;
-		a.num_nzvals = num_nzvals;
-		for(int i = 0; i < num_nzvals ; i++)
-				for(int k = 0; k < num_dims; k++)
+		for(int i = 0; i < b.num_nzvals; i++)
+		{
+			for(int j = 0; j < num_nzvals; j++)
+			{
+				flag = 0;
+				for(int k =0; k < num_dims; k++)
 				{
-					if(indices[i][k] == b.indices[i][k])
-						continue;
-					else
-						nz++;
+					if(b.indices[i][k] != indices[j][k])
+					{
+						flag = 1; break;
+					}
 				}
+				if(flag != 1)
+				{
+					b.nz_vals[i] += nz_vals[j];
+					nz_vals[j] = 0;
+				}
+			}
 		}
-		a.num_nzvals = num_nzvals + nz;
+		for(int i =0; i < num_nzvals; i++)
+		{
+			if(nz_vals[i] != 0)
+			{
+				b.num_nzvals++;
+				b.nz_vals[b.num_nzvals] = nz_vals[i];
+				b.indices[b.num_nzvals] = indices[i];
+			}
+			
+		}
 	}
+	return b;
 }
-*/
-/*double* Sparse_matrix :: dotprod(Sparse_matrix a) // INCOMPLETE
+
+
+double* Sparse_matrix :: dotprod(Sparse_matrix &a) 
 {
-	int endval;
-	if(num_nzvals > a.num_nzvals)
-		endval = num_nzvals;
-	else
-		endval = a.num_nzvals;
-
 	double *dots;
-	dots = new double[endval];
-	for(int i = 0; i < endval; i++)
-		dots[i] = 0;
-
+	int endval, l=0, flag =0;
 	if(num_dims != a.num_dims)
 	{
-		cout<<"\nMatrices Incompatible for dot porduct";
+		cout<<"\nMatrices Incompatible for dot product";
 		return dots;
 	}
 	else
@@ -664,20 +731,50 @@ Sparse_matrix Sparse_matrix :: addition(Sparse_matrix b)	//Matrix addition - ind
 		{
 			if(shape[i] != a.shape[i])
 			{
-				cout<<"\nMatrices Incompatible for dot porduct";
+				cout<<"\nMatrices Incompatible for dot product";
 				return dots;
 			}
 		}
+		if(num_nzvals < a.num_nzvals)
+			endval = num_nzvals;
+		else
+			endval = a.num_nzvals;
+		dots = new double[endval];
 		for(int i = 0; i < endval; i++)
-			for(int j = 0 ; j < num_dims; j++)
+                	dots[i] = 0;
+		for(int i = 0; i < num_nzvals; i++)
+		{
+			for(int j = 0 ; j < a.num_nzvals; j++)
 			{
-				if((indices[i][j] == a.indices[i][j]) && (indices[i][j+1] == a.indices[i][j+1]))
+				flag = 0;
+				for(int k = 0; k < num_dims; k++)
+					if(indices[i][k] != a.indices[j][k])
+					{
+						flag = 1;break;
+					}
+				if(flag != 1)
 				{
-					dots[i] += nz_vals[i] * a.nz_vals[i];
+					dots[l] += nz_vals[i] * a.nz_vals[j];
+					l++;
 					break;
-				}					
+				}				
 			}
-				
+		}
+
 	}
 	return dots;
-}*/
+}
+
+Sparse_matrix Sparse_matrix :: slice(int *axes)
+{
+	Sparse_matrix a(num_dims, num_nzvals,nz_vals,shape,indices)
+	for(int i = 0;i < num_nzvals; i++)
+	{
+		for(int j = 0; j < num_dims; j++)
+		{
+			
+		}
+	}
+	return a;
+}
+		
