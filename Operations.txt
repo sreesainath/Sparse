@@ -67,7 +67,7 @@ returns -Matrix
 33.Positive
 returns +Matrix
 34.Absolute
-Returs |Matrix|
+Returns |Matrix|
 35.Inverse
 Inverse of the matrix(If invertible)
 36.Matrix addition
@@ -77,7 +77,7 @@ Inverse of the matrix(If invertible)
 40.Tensor Dot product
 
 
-The sparser matrix is assumed to be real at this point.
+The sparse matrix is assumed to be real at this point.
 
 ELEMENT-WISE OPERATIONS
 
