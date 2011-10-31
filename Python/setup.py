@@ -20,11 +20,10 @@ if __name__ == "__main__":
         cmdclass = {'build_ext': build_ext},
         ext_modules = [
             Extension(
-                "sparse.wrapper",
-                ["sparse/wrapper.pyx"],
+                "sparse.headers.wrapper",
+                sources=["sparse/headers/wrapper.pyx"],
                 language="c++",
             )
         ],
-        packages=['sparse']
+        packages=['sparse.headers']
     )
-
