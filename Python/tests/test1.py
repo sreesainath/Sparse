@@ -14,8 +14,13 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_constructor(self):
         s = w.SparseTensor()
-        s.getdata()
 	        
+    def test_getitem(self):
+        s = w.SparseTensor()
+        s[2,2] = 5
+
+        self.assertTrue( s[2,2] == 5 )
+
 
 if __name__ == '__main__':
     unittest.main()
