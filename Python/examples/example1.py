@@ -6,6 +6,7 @@ sys.path.insert(0, "../")
 
 import sparse.wrapper as w
 
-test = w.Test()
+test = w.SparseTensor()
+
 test.test_some()
 
