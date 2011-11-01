@@ -1,29 +1,9 @@
-June 2011
-16 june 
+November 2011
 
-15.30 -  17.30                       changing the functions mirror nympy functions(except axis parameter)
-				     cmprod, cumsum
-				     Started work on dot product
+13.45 - 14.45
 
+Checked out YARP, Pycuda and code to be run on GPU
 
-July 2011
-4 July
+17.00 - 17.35
 
-14.15 - 18.00			    Discussion on python linking and general work
-				    dot product completed
-				    
-
-24 July 
-14.00 - 17.30			    Work on axis parameters for functions
-
-29 July				    Axis parameters and slice function(incomplete)
-
-
-
-
-
-August 2011
-1 August
-
-15.00 - 19.30                       Slice function, finetuning other functions, removal of unwanted code, discussion on python linking
-
+New repository added for Python linking. The old one will be committed on thrusday
